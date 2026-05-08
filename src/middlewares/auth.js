@@ -1,4 +1,4 @@
-export const adminAuth = (req, res, next)=>{
+const adminAuth = (req, res, next)=>{
     console.log("Admin auth is getting checked");
     const token = 'xyz';
     const isAdminAuthorized = token === 'xyz';
@@ -7,4 +7,20 @@ export const adminAuth = (req, res, next)=>{
     }else{
         next();
     }
+}
+
+const userAuth = (req, res, next)=>{
+    console.log("User auth is getting checked");
+    const token = 'xyz';
+    const isUserAuthorized = token === 'xyz';
+    if(!isUserAuthorized){
+        res.status(401).send("Unuthorized Request");
+    }else{
+        next();
+    }
+}
+
+module.exports = {
+    adminAuth,
+    userAuth
 }
