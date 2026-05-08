@@ -44,8 +44,8 @@ app.get('/user', async (req, res) => {
   }
 });
 
-// get all users
-app.get('/users', async (req, res) => {
+// Feed api / get all users
+app.get('/feed', async (req, res) => {
   try {
     const users = await User.find();
     res.status(200).json({
