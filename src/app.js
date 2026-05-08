@@ -44,6 +44,22 @@ app.get('/user', async (req, res) => {
   }
 });
 
+// get all users
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      message: "Users found",
+      users
+    })
+  } catch (error) {
+    res.status(400).json({
+      message: "Error fetching users",
+      error
+    })
+  }
+});
+
 
 connectDB().then(() => {
   console.log("Database connection has been stablished");
