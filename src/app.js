@@ -60,6 +60,27 @@ app.get('/feed', async (req, res) => {
   }
 });
 
+// User delete user by userId
+app.delete('/user', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete({ _id: req.body?.userId });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      })
+    }
+    res.status(200).json({
+      message: "User deleted successfully",
+      user
+    })
+  } catch (error) {
+    res.status(400).json({
+      message: "Error deleting user",
+      error
+    })
+  }
+});
+
 
 connectDB().then(() => {
   console.log("Database connection has been stablished");
