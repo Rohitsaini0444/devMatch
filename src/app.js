@@ -82,10 +82,18 @@ app.delete('/user', async (req, res) => {
 });
 
 // Update user by userId
-app.patch('/user', async (req, res) => {
+app.patch('/user/:userId', async (req, res) => {
   try {
     const dataToUpdate = req.body?.data;
-    const user = await User.findByIdAndUpdate({ _id: req.body?.userId }, dataToUpdate, { new: true });
+    const allowedFields = ['age', 'gender', 'photoURL', 'skills', 'about'];
+    const isValidUpdate = Object.keys(dataToUpdate).every((field) => allowedFields.includes(field));
+    if (!isValidUpdate) {
+      throw new Error('Invalid update fields');
+    }
+    if (dataToUpdate?.skills?.length > 10) {
+      throw new Error('Maximum 10 skills allowed');
+    }
+    const user = await User.findByIdAndUpdate(req.params.userId, dataToUpdate, { new: true, runValidators: true });
     if (!user) {
       return res.status(404).json({
         message: "User not found"
@@ -97,7 +105,7 @@ app.patch('/user', async (req, res) => {
     })
   } catch (error) {
     res.status(400).json({
-      message: "Error updating user",
+      message: "Error updating user " + error.message,
       error
     })
   }
