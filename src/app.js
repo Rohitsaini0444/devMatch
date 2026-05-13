@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const { adminAuth, userAuth } = require('./middlewares/auth');
+const { validateUserData } = require('./utils/validator');
+const bcrypt = require('bcrypt');
 const User = require('./models/user');
 
 const connectDB = require('./config/database');
@@ -8,8 +10,22 @@ const connectDB = require('./config/database');
 app.use(express.json());
 
 app.post('/signup', async (req, res) => {
-  const user = new User(req.body);
   try {
+    validateUserData(req.body);
+    // Hashing password before saving to database
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const user = new User({
+      firstName: req.body?.firstName,
+      lastName: req.body?.lastName,
+      email: req.body?.email,
+      age: req.body?.age,
+      gender: req.body?.gender,
+      photoURL: req.body?.photoURL,
+      skills: req.body?.skills,
+      about: req.body?.about,
+      password: hashedPassword
+    });
     await user.save();
     res.status(200).json({
       message: "User created successfully",
