@@ -1,13 +1,15 @@
 const express = require('express');
 const app = express();
-const { adminAuth, userAuth } = require('./middlewares/auth');
+const { userAuth } = require('./middlewares/auth');
 const { validateUserData } = require('./utils/validator');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
 const User = require('./models/user');
 
 const connectDB = require('./config/database');
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', async (req, res) => {
   try {
@@ -48,12 +50,14 @@ app.post('/login', async (req, res) => {
         message: "User not found"
       })
     }
-    const isMatch = await bcrypt.compare(req.body?.password, user.password);
+    const isMatch = await user.validatePassword(req.body?.password);
     if (!isMatch) {
       return res.status(400).json({
         message: "Invalid credentials"
       })
     }
+    const token = await user.getAuthenticatedUser();
+    res.cookie('token', token, { httpOnly: true, expires: new Date(Date.now() + 3600000) }); 
     res.status(200).json({
       message: "User logged in successfully",
       user
@@ -61,6 +65,22 @@ app.post('/login', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       message: "Error logging in user",
+      error
+    })
+  }
+});
+
+// Get user profile
+app.get('/profile', userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      message: "User profile fetched successfully",
+      user
+    })
+  } catch (error) {
+    res.status(400).json({
+      message: "Error fetching user profile",
       error
     })
   }

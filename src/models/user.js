@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -33,7 +35,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         validate: {
             validator: function (value) {
-                if(!['male', 'female', 'other'].includes(value.toLowerCase())) {
+                if (!['male', 'female', 'other'].includes(value.toLowerCase())) {
                     throw new Error('Invalid gender value');
                 }
             }
@@ -58,6 +60,18 @@ const userSchema = new mongoose.Schema({
         default: "Hey there! I am using Developer Connect."
     }
 })
+
+userSchema.methods.getAuthenticatedUser = async function () {
+    const user = this;
+    const token = jwt.sign({ userId: user._id }, "XYZ1234567890");
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const user = this;
+    const passwordHash = user.password;
+    return await bcrypt.compare(passwordInputByUser, passwordHash);
+}
 
 const User = mongoose.model('User', userSchema);
 
