@@ -24,6 +24,17 @@ const validateUserData = (userData) => {
     }
 };
 
+const validateEditProfileData = (req) => {
+    const allowedFields = ['age', 'gender', 'photoURL', 'skills', 'about'];
+    const updates = req.body;
+    const isValidUpdate = Object.keys(updates).every((field) => allowedFields.includes(field));
+    if (!isValidUpdate) {
+        throw new Error('Invalid update fields');
+    }
+    return true; 
+}
+
 module.exports = {
-    validateUserData
+    validateUserData,
+    validateEditProfileData 
 };
