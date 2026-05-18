@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { userAuth } = require('../middlewares/auth');
-const User = require('../models/user');
-const { validateUserData, validateEditProfileData} = require('../utils/validator');
+const { validateEditProfileData} = require('../utils/validator');
+const bcrypt = require('bcrypt');
 
 // Get user profile
 router.get('/view', userAuth, async (req, res) => {
@@ -41,5 +41,30 @@ router.patch('/edit', userAuth, async (req, res) => {
   }
 });
 
+// update password
+router.patch('/password', userAuth, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const loggedInUser = req.user;
+    const isMatch = await loggedInUser.validatePassword(oldPassword);
+    if (!isMatch) {
+      return res.status(400).json({     
+        message: "Invalid old password"
+      })
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    loggedInUser.password = hashedPassword;
+    await loggedInUser.save();
+    res.status(200).json({
+      message: "Password updated successfully"
+    })
+  } catch (error) {
+    res.status(400).json({
+      message: "Error updating password",
+      error
+    })
+  }
+});
 
 module.exports = router;
