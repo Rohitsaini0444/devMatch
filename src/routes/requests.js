@@ -53,10 +53,28 @@ router.post('/review/:status/:requestId', async (req, res) => {
     try {
         const { status } = req.params;
         const { requestId } = req.params;
-        // Here you can implement the logic to update the request status in the database
-        await Connection.findByIdAndUpdate(requestId, { status });
+        const allowedStatuses = ['accepted', 'rejected'];
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid status"
+            })
+        }
+        if(req?.user?._id.toString() === requestId) {
+            return res.status(400).json({
+                message: "You cannot review your own request"
+            })
+        }
+        const existingRequest = await Connection.findOne({ _id: requestId , toUserId: req?.user?._id , status: 'interested' });
+        if (!existingRequest) {
+            return res.status(404).json({
+                message: "Request not found for review"
+            });
+        }
+        existingRequest.status = status;
+        await existingRequest.save();
         res.status(200).json({
-            message: "Request reviewed successfully"
+            message: "Request reviewed successfully",
+            connection: existingRequest
         })
     } catch (error) {
         res.status(400).json({
