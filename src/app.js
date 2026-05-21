@@ -14,9 +14,9 @@ app.use(cookieParser());
 app.use('/profile', profileRoutes);
 
 app.use('/auth', authRoutes);
-app.use('/profile', profileRoutes);
-app.use('/request', requestRoutes);
-app.use('/user', userRoutes); 
+app.use('/profile',userAuth, profileRoutes);
+app.use('/request', userAuth, requestRoutes);
+app.use('/user', userAuth, userRoutes); 
 
 
 
