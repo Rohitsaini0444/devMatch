@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 
 const { userAuth } = require("../middlewares/auth");
-const ConnectionRequest = require("../models/connectionRequest");
+const Connections = require("../models/connections");
 const User = require("../models/user");
 
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
@@ -12,7 +12,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    const connectionRequests = await ConnectionRequest.find({
+    const connectionRequests = await Connections.find({
       toUserId: loggedInUser._id,
       status: "interested",
     }).populate("fromUserId", USER_SAFE_DATA);
@@ -31,7 +31,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    const connectionRequests = await ConnectionRequest.find({
+    const connectionRequests = await Connections.find({
       $or: [
         { toUserId: loggedInUser._id, status: "accepted" },
         { fromUserId: loggedInUser._id, status: "accepted" },
@@ -64,7 +64,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
 
-    const connectionRequests = await ConnectionRequest.find({
+    const connectionRequests = await Connections.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId  toUserId");
 

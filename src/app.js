@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+require('dotenv').config();
 const { userAuth } = require('./middlewares/auth');
 const cookieParser = require('cookie-parser');
 const User = require('./models/user');
