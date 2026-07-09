@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+var cors = require('cors');
 require('dotenv').config();
 const { userAuth } = require('./middlewares/auth');
 const cookieParser = require('cookie-parser');
@@ -11,6 +12,11 @@ const userRoutes = require('./routes/user');
 const connectDB = require('./config/database');
 
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173', // Replace with your frontend URL
+  credentials: true, // Allow cookies to be sent
+}));
+
 app.use(cookieParser());
 app.use('/profile', profileRoutes);
 
