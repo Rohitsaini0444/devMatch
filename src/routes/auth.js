@@ -15,21 +15,18 @@ router.post('/signup', async (req, res) => {
             firstName: req.body?.firstName,
             lastName: req.body?.lastName,
             email: req.body?.email,
-            age: req.body?.age,
-            gender: req.body?.gender,
-            photoURL: req.body?.photoURL,
-            skills: req.body?.skills,
-            about: req.body?.about,
             password: hashedPassword
         });
-        await user.save();
+        const savedUser = await user.save();
+        const token = await savedUser.getAuthenticatedUser();
+        res.cookie('token', token, { httpOnly: true, expires: new Date(Date.now() + 3600000) });
         res.status(200).json({
             message: "User created successfully",
-            user
+            user: savedUser
         })
     } catch (error) {
         res.status(400).json({
-            message: "Error creating user",
+            message: error?.message || "Error creating user",
             error
         })
     }

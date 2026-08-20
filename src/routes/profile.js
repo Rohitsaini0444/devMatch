@@ -20,7 +20,7 @@ router.get('/view', userAuth, async (req, res) => {
   }
 });
 
-router.patch('/edit', userAuth, async (req, res) => {
+router.post('/edit', userAuth, async (req, res) => {
   try {
     const updates = req.body;
     validateEditProfileData(req);
