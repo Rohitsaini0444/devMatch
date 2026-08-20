@@ -1,7 +1,7 @@
-# devMatch
+# devConnect
 
 ## Overview
-`devMatch` is a developer networking backend built with Node.js, Express, and MongoDB. It enables developers to sign up, log in, manage profiles, and connect with other developers through interest-based requests.
+`devConnect` is a developer networking backend built with Node.js, Express, and MongoDB. It enables developers to sign up, log in, manage profiles, and connect with other developers through interest-based requests.
 
 ## Features
 - User registration and authentication
@@ -17,7 +17,7 @@
 ## Installation
 ```bash
 git clone <repository-url>
-cd devMatch
+cd devConnect
 npm install
 ```
 
