@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const { validateUserData } = require('../utils/validator');
+const { run } = require('../utils/sendEmail');
 
 // Signup user
 router.post('/signup', async (req, res) => {
@@ -20,6 +21,14 @@ router.post('/signup', async (req, res) => {
         const savedUser = await user.save();
         const token = await savedUser.getAuthenticatedUser();
         res.cookie('token', token, { httpOnly: true, expires: new Date(Date.now() + 3600000) });
+        try {
+            if (process.env.EMAIL_SERVICE_ENABLED === true || process.env.EMAIL_SERVICE_ENABLED === 'true') {
+                const emailResult = await run("Welcome to DevConnect", "Thank you for signing up! We're excited to have you on board. If you have any questions or need assistance, feel free to reach out to our support team.", savedUser.email);
+                console.log('Email sent:', emailResult);
+            }
+        } catch (error) {
+            console.error('Error sending welcome email:', error);
+        }
         res.status(200).json({
             message: "User created successfully",
             user: savedUser
@@ -62,7 +71,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-    res.cookie('token', null, { expires: new Date(Date.now())});
+    res.cookie('token', null, { expires: new Date(Date.now()) });
     res.send({
         message: "User logged out successfully"
     })
