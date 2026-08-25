@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Connection = require('../models/connections');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { validateUserData } = require('../utils/validator');
 
 router.post('/send/:status/:userId', async (req, res) => {
     try {

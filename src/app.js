@@ -10,12 +10,13 @@ const profileRoutes = require('./routes/profile');
 const requestRoutes = require('./routes/requests');
 const userRoutes = require('./routes/user');
 const connectDB = require('./config/database');
+const {startWeeklyReportsScheduler} = require('./helpers/reports');
 
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your frontend URL
-  credentials: true, // Allow cookies to be sent
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] // Allowed methods
+  origin: process.env.WHITE_LISTED_URLS?.split(',') || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
 }));
 
 app.use(cookieParser());
@@ -28,85 +29,13 @@ app.use('/user', userAuth, userRoutes);
 
 
 
-// get user by email
-// app.get('/user', async (req, res) => {
-//   try {
-//     const user = await User.findOne({ email: req.body?.emailId });
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found"
-//       })
-//     }
-//     res.status(200).json({
-//       message: "User found",
-//       user
-//     })
-//   } catch (error) {
-//     res.status(400).json({
-//       message: "Error fetching user",
-//       error
-//     })
-//   }
-// });
-
-
-// // User delete user by userId
-// app.delete('/user', async (req, res) => {
-//   try {
-//     const user = await User.findByIdAndDelete({ _id: req.body?.userId });
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found"
-//       })
-//     }
-//     res.status(200).json({
-//       message: "User deleted successfully",
-//       user
-//     })
-//   } catch (error) {
-//     res.status(400).json({
-//       message: "Error deleting user",
-//       error
-//     })
-//   }
-// });
-
-// // Update user by userId
-// app.patch('/user/:userId', async (req, res) => {
-//   try {
-//     const dataToUpdate = req.body?.data;
-//     const allowedFields = ['age', 'gender', 'photoURL', 'skills', 'about'];
-//     const isValidUpdate = Object.keys(dataToUpdate).every((field) => allowedFields.includes(field));
-//     if (!isValidUpdate) {
-//       throw new Error('Invalid update fields');
-//     }
-//     if (dataToUpdate?.skills?.length > 10) {
-//       throw new Error('Maximum 10 skills allowed');
-//     }
-//     const user = await User.findByIdAndUpdate(req.params.userId, dataToUpdate, { new: true, runValidators: true });
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found"
-//       })
-//     }
-//     res.status(200).json({
-//       message: "User updated successfully",
-//       user
-//     })
-//   } catch (error) {
-//     res.status(400).json({
-//       message: "Error updating user " + error.message,
-//       error
-//     })
-//   }
-// });
-
 connectDB().then(() => {
   console.log("Database connection has been stablished");
 
-  app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+  app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server is running on port http://localhost:${process.env.PORT || 3000}`);
   });
+  startWeeklyReportsScheduler();
 }).catch((err) => {
   console.log("Database can not be connected");
 });
