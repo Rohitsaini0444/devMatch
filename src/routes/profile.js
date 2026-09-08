@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { userAuth } = require('../middlewares/auth');
-const { validateEditProfileData} = require('../utils/validator');
+const { validateEditProfileData, validatePasswordChange } = require('../utils/validator');
 const bcrypt = require('bcrypt');
 
 // Get user profile
@@ -15,19 +15,21 @@ router.get('/view', userAuth, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       message: "Error fetching user profile",
-      error
+      error: error?.message
     })
   }
 });
 
 router.post('/edit', userAuth, async (req, res) => {
   try {
-    const updates = req.body;
     validateEditProfileData(req);
+    const updates = req.body;
     const loggedInUser = req.user;
+    
     Object.keys(updates).forEach((key) => {
       loggedInUser[key] = updates[key];
     });
+    
     await loggedInUser.save();
     res.status(200).json({
       message: "User profile updated successfully",
@@ -35,8 +37,8 @@ router.post('/edit', userAuth, async (req, res) => {
     })
   } catch (error) {
     res.status(400).json({
-      message: "Error updating user profile",
-      error
+      message: error?.message || "Error updating user profile",
+      error: error?.message
     })
   }
 });
@@ -45,6 +47,10 @@ router.post('/edit', userAuth, async (req, res) => {
 router.patch('/password', userAuth, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    
+    // Validate password change
+    validatePasswordChange(oldPassword, newPassword);
+    
     const loggedInUser = req.user;
     const isMatch = await loggedInUser.validatePassword(oldPassword);
     if (!isMatch) {
@@ -61,8 +67,8 @@ router.patch('/password', userAuth, async (req, res) => {
     })
   } catch (error) {
     res.status(400).json({
-      message: "Error updating password",
-      error
+      message: error?.message || "Error updating password",
+      error: error?.message
     })
   }
 });

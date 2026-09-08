@@ -35,8 +35,7 @@ router.post('/signup', async (req, res) => {
         })
     } catch (error) {
         res.status(400).json({
-            message: error?.message || "Error creating user",
-            error
+            message: error?.message || "Error creating user"
         })
     }
 });
@@ -44,16 +43,24 @@ router.post('/signup', async (req, res) => {
 //Login user
 router.post('/login', async (req, res) => {
     try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required"
+            });
+        }
+
         const user = await User.findOne({ email: req.body?.email });
         if (!user) {
             return res.status(404).json({
-                message: "User not found"
+                message: "User not found. Please check your email or sign up."
             })
         }
         const isMatch = await user.validatePassword(req.body?.password);
         if (!isMatch) {
-            return res.status(400).json({
-                message: "Invalid credentials"
+            return res.status(401).json({
+                message: "Invalid password. Please try again."
             })
         }
         const token = await user.getAuthenticatedUser();
@@ -64,8 +71,7 @@ router.post('/login', async (req, res) => {
         })
     } catch (error) {
         res.status(400).json({
-            message: "Error logging in user",
-            error
+            message: error?.message || "Error logging in user"
         })
     }
 });
